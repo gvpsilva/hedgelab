@@ -28,3 +28,57 @@ Uma empresa importadora tem uma dívida em dólar a pagar no futuro e uma dívid
 - Matriz com 13 cenários de câmbio (de -25% a +35%) indicando a estratégia mais barata em cada um;
 - Análise do swap e parecer técnico gerados automaticamente;
 - Relatórios de saída: **exportação para CSV** (abre no Excel) e **impressão/PDF**.
+
+## Tecnologias
+
+| Tecnologia | Uso no projeto |
+|---|---|
+| **HTML, CSS e JavaScript** (sem frameworks) | Interface e lógica da aplicação, que roda inteira no navegador. |
+| **Chart.js** | Biblioteca de gráficos usada no gráfico de payoff. |
+| **Node.js** | Ambiente para rodar os testes e o servidor local (`scripts/servidor.js`). |
+| **Jest + jsdom** | Testes unitários e medição de cobertura (Istanbul, embutido no Jest). O jsdom simula a página para testar a camada de interface. |
+| **Playwright** | Testes end-to-end em navegador real (Chromium). |
+| **GitHub Actions** | CI/CD: testes e cobertura em Linux, macOS e Windows a cada commit; deploy na Vercel e geração de release quando a `main` muda. |
+| **Vercel** | Hospedagem em produção (plano gratuito Hobby). O deploy é feito pelo GitHub Actions com a Vercel CLI, só depois que os testes passam (configuração em `vercel.json`). |
+
+**Organização do código** (`public/js`), em módulos com responsabilidades separadas:
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `formatacao.js` | Formatação de valores no padrão brasileiro (R$, vírgula decimal, percentuais). |
+| `calculos.js` | Modelos financeiros puros: forward, opção, swap, cenários e validação. |
+| `relatorio.js` | Geração dos textos, linhas da tabela e do arquivo CSV. |
+| `app.js` | Única camada que acessa a página: captura os dados e exibe os relatórios. |
+
+Separar os cálculos da interface permite testar quase todo o sistema com testes unitários rápidos, sem navegador.
+
+### Uso de ferramentas de Inteligência Artificial
+
+Durante o desenvolvimento, foram utilizadas ferramentas de Inteligência Artificial como apoio às atividades de programação, revisão de código, elaboração de testes e documentação.
+
+A equipe foi responsável pela definição dos requisitos, validação das funcionalidades, conferência dos cálculos financeiros, revisão dos resultados e decisões de implementação, assegurando a adequação da solução aos objetivos da disciplina.
+
+
+## Execução dos testes
+
+
+**Resumo dos testes**
+
+
+
+Testes end-to-end:
+
+
+
+## CI/CD e releases
+
+
+
+**Configuração (uma única vez)**
+
+1. Na Vercel, importe o repositório (Add New → Project) para criar o projeto.
+2. Crie um token em *Account Settings → Tokens*.
+3. Obtenha os IDs: rode `npx vercel login` e `npx vercel link` na pasta do projeto; os valores `orgId` e `projectId` ficam em `.vercel/project.json`.
+4. No GitHub, em *Settings → Secrets and variables → Actions*, cadastre os segredos `VERCEL_TOKEN`, `VERCEL_ORG_ID` e `VERCEL_PROJECT_ID`.
+
+O `vercel.json` desliga o deploy automático da integração Git da Vercel (`git.deploymentEnabled: false`), para que só o GitHub Actions publique, e sempre depois dos testes.
