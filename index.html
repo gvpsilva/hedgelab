@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Gestão de Riscos, Hedge Cambial e Swap de Juros</title>
+
+  <!-- Folha de estilos externa (aparência da página e versão para impressão) -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Chart.js (versão fixa 4.4.1) via CDN para plotar as curvas de payoff.
+       Precisa de internet; sem ela, a página funciona e só o gráfico não aparece. -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Sistema Corporativo de Gestão de Riscos &amp; Hedge Cambial</h1>
+      <p>Simulação de Operações Financeiras: Contratos a Termo (Forward), Opções e Swap de Taxa de Juros</p>
+    </header>
+
+    <!-- Layout em duas colunas: formulário à esquerda, relatórios à direita -->
+    <div class="dashboard-grid">
+      <!-- Cada campo tem limites (min/max/step) e "required": o script.js
+           verifica esses limites antes de calcular (função lerParametros). -->
+      <aside>
+        <div class="card">
+          <div class="card-title">
+            <span>Parâmetros de Mercado</span>
+          </div>
+
+          <!-- "novalidate" desliga a validação automática do navegador para que o
+               script.js controle quando e como os erros são mostrados -->
+          <form id="hedgeForm" novalidate>
+
+            <!-- Valor em dólares que a empresa precisa pagar no vencimento -->
+            <div class="form-group">
+              <label for="exposureUSD">Exposição Cambial a Pagar (US$)</label>
+              <input type="number" id="exposureUSD" value="1000000" min="1000" step="1000" required>
+              <div class="helper-text">Valor total da dívida ou obrigação de importação.</div>
+            </div>
+
+            <!-- S0: cotação do dólar hoje, ponto de partida dos cenários -->
+            <div class="form-group">
+              <label for="spotRate">Cotação Spot Atual (S₀ em R$/US$)</label>
+              <input type="number" id="spotRate" value="5.2000" min="0.1" step="0.0001" required>
+              <div class="helper-text">Cotação à vista do dólar comercial hoje.</div>
+            </div>
+
+            <!-- r_BRL: usada no forward, na capitalização do prêmio e como taxa flutuante do swap -->
+            <div class="form-group">
+              <label for="interestBR">Taxa de Juros Brasil (r_BRL % a.a.)</label>
+              <input type="number" id="interestBR" value="10.75" min="0" max="100" step="0.05" required>
+              <div class="helper-text">Taxa livre de risco doméstica (Selic/CDI).</div>
+            </div>
+
+            <!-- r_USD: taxa estrangeira usada na paridade coberta de juros -->
+            <div class="form-group">
+              <label for="interestUS">Taxa de Juros EUA (r_USD % a.a.)</label>
+              <input type="number" id="interestUS" value="4.50" min="0" max="100" step="0.05" required>
+              <div class="helper-text">Taxa livre de risco internacional (SOFR/Treasuries).</div>
+            </div>
+
+            <!-- Prazo em meses; o script converte para anos (t = meses / 12) -->
+            <div class="form-group">
+              <label for="tenorMonths">Prazo da Operação (Meses)</label>
+              <input type="number" id="tenorMonths" value="12" min="1" max="60" step="1" required>
+              <div class="helper-text">Tempo até a liquidação financeira da dívida.</div>
+            </div>
+
+            <div class="card-title section-break">
+              <span>Parâmetros da Opção (Call)</span>
+            </div>
+
+            <!-- K: preço máximo que a empresa pagará pelo dólar se exercer a opção -->
+            <div class="form-group">
+              <label for="strikeRate">Preço de Exercício (Strike K em R$/US$)</label>
+              <input type="number" id="strikeRate" value="5.3000" min="0.1" step="0.0001" required>
+              <div class="helper-text">Cotação teto garantida pela opção de compra.</div>
+            </div>
+
+            <!-- Prêmio pago hoje por dólar protegido (custo do "seguro") -->
+            <div class="form-group">
+              <label for="optionPremium">Prêmio da Opção (R$ por US$)</label>
+              <input type="number" id="optionPremium" value="0.1800" min="0" step="0.005" required>
+              <div class="helper-text">Custo do prêmio pago à vista ao lançador da opção.</div>
+            </div>
+
+            <div class="card-title section-break">
+              <span>Operação de Swap de Juros</span>
+            </div>
+
+            <!-- Principal (notional) da dívida em reais sobre o qual os juros incidem -->
+            <div class="form-group">
+              <label for="swapNotional">Principal do Empréstimo em R$</label>
+              <input type="number" id="swapNotional" value="5000000" min="10000" step="10000" required>
+              <div class="helper-text">Dívida bancária local indexada a taxas flutuantes.</div>
+            </div>
+
+            <!-- Taxa fixa que a empresa passa a pagar no swap -->
+            <div class="form-group">
+              <label for="swapFixedRate">Taxa Pré Fixada do Swap (% a.a.)</label>
+              <input type="number" id="swapFixedRate" value="11.20" min="0" max="100" step="0.05" required>
+              <div class="helper-text">Taxa que a empresa deseja travar no swap de juros.</div>
+            </div>
+
+            <!-- "Calcular" envia o formulário (tratado no script.js, também com Enter);
+                 "Exemplo Prático" preenche um caso pronto e já simula -->
+            <div class="btn-group">
+              <button type="submit" class="btn btn-primary">Calcular &amp; Simular</button>
+              <button type="button" class="btn btn-secondary" onclick="carregarCasoPratico()">Exemplo Prático</button>
+            </div>
+          </form>
+        </div>
+      </aside>
+      <main>
+
+        <!-- Relatório 1: indicadores principais -->
+        <div class="metrics-row">
+          <div class="metric-box">
+            <div class="metric-label">Taxa a Termo Teórica (Forward)</div>
+            <div class="metric-value" id="dispForwardRate">—</div>
+            <div class="helper-text">Calculada via Paridade Coberta de Juros</div>
+          </div>
+          <div class="metric-box accent">
+            <div class="metric-label">Custo Travado no Termo</div>
+            <div class="metric-value" id="dispForwardCost">—</div>
+            <div class="helper-text">Risco cambial 100% imunizado</div>
+          </div>
+          <div class="metric-box warning">
+            <div class="metric-label">Custo Teto com Opção (Call)</div>
+            <div class="metric-value" id="dispCallCeiling">—</div>
+            <div class="helper-text">Exercício (K) + Prêmio Capitalizado</div>
+          </div>
+        </div>
+
+        <!-- Relatório 2: gráfico de sensibilidade (payoff) das três estratégias -->
+        <div class="card">
+          <div class="card-title">
+            <span>Análise Gráfica de Sensibilidade de Payoff (Custo Total em R$)</span>
+          </div>
+          <p class="card-subtitle">
+            Comparação da curva de desembolso em moeda local sob diferentes níveis de fechamento da taxa de câmbio no vencimento.
+          </p>
+          <div class="chart-container">
+            <canvas id="payoffChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Relatório 3: matriz de cenários, swap e parecer -->
+        <div class="card">
+          <div class="card-title">
+            <span>Matriz de Simulação de Cenários de Câmbio no Vencimento</span>
+          </div>
+          <div class="table-responsive">
+            <table id="scenariosTable">
+              <thead>
+                <tr>
+                  <th>Cenário Spot Final</th>
+                  <th>Sem Proteção (Unhedged)</th>
+                  <th>Contrato a Termo (Forward)</th>
+                  <th>Opção de Compra (Call)</th>
+                  <th>Opção vs Termo</th>
+                </tr>
+              </thead>
+              <tbody id="scenariosBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Relatório 4: análise do swap de taxa de juros (atualizarModuloSwap) -->
+          <div class="swap-section">
+            <h4>Análise da Operação de Swap de Taxa de Juros (ALM Corporativo)</h4>
+            <p id="swapAnalysisText"></p>
+          </div>
+
+          <!-- Relatório 5: parecer técnico automático (atualizarParecerTecnico) -->
+          <div class="report-opinion">
+            <h4>Parecer Técnico da Diretoria de Riscos e Tesouraria</h4>
+            <p id="executiveOpinionText"></p>
+          </div>
+        </div>
+
+        <!-- Relatório 6: resumo da simulação, com data/hora e os parâmetros usados,
+             e as opções de saída (impressão/PDF e arquivo CSV para Excel) -->
+        <div class="card report-summary">
+          <div class="card-title">
+            <span>Relatório da Simulação</span>
+            <div class="report-actions">
+              <button type="button" class="btn btn-secondary btn-small" onclick="exportarCSV()">Exportar CSV (Excel)</button>
+              <button type="button" class="btn btn-secondary btn-small" onclick="window.print()">Imprimir / PDF</button>
+            </div>
+          </div>
+          <p class="card-subtitle">Gerado em <strong id="reportTimestamp">—</strong> com os parâmetros abaixo.</p>
+          <dl id="reportParams" class="report-params"></dl>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
