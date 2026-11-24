@@ -1,0 +1,14 @@
+# Dependências
+node_modules/
+
+# Relatórios de testes e cobertura
+coverage/
+test-results/
+playwright-report/
+blob-report/
+
+# Sistema operacional / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
