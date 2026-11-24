@@ -5,6 +5,14 @@ on:
   pull_request:
   workflow_dispatch:
 
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   testes:
     name: Testes (${{ matrix.os }})
@@ -50,34 +58,85 @@ jobs:
           name: playwright-report-${{ matrix.os }}
           path: playwright-report/
 
+
   deploy:
-    name: Deploy em produção (GitHub Pages)
-    needs: testes # Só publica se os testes passarem nos três sistemas
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Deploy em produção (Vercel)
+    needs: testes 
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
     environment:
-      name: github-pages
-      url: ${{ steps.publicacao.outputs.page_url }}
-    concurrency:
-      group: pages
-      cancel-in-progress: false
+      name: production
+      url: ${{ steps.publicar.outputs.url }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    outputs:
+      url: ${{ steps.publicar.outputs.url }}
 
     steps:
       - name: Baixar o código
         uses: actions/checkout@v4
 
-      - name: Configurar GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Empacotar a pasta public
-        uses: actions/upload-pages-artifact@v3
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
         with:
-          path: public
+          node-version: 22
 
-      - name: Publicar
-        id: publicacao
-        uses: actions/deploy-pages@v4
+      - name: Instalar a Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Baixar as configurações do projeto na Vercel
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Preparar os arquivos de produção
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Publicar na Vercel
+        id: publicar
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Publicado em: $url" >> "$GITHUB_STEP_SUMMARY"
+
+
+  release:
+    name: Gerar release
+    needs: deploy 
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Definir a versão
+        id: versao
+        run: |
+          base=$(node -p "require('./package.json').version.split('.').slice(0, 2).join('.')")
+          echo "tag=v${base}.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Baixar o relatório de cobertura
+        uses: actions/download-artifact@v4
+        with:
+          name: cobertura
+          path: coverage
+
+      - name: Empacotar o site e a cobertura
+        run: |
+          zip -qr "hedgelab-site-${{ steps.versao.outputs.tag }}.zip" public
+          zip -qr "hedgelab-cobertura-${{ steps.versao.outputs.tag }}.zip" coverage
+
+      - name: Criar a release no GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.versao.outputs.tag }}
+          URL_PRODUCAO: ${{ needs.deploy.outputs.url }}
+        run: |
+          gh release create "$TAG" \
+            "hedgelab-site-$TAG.zip" \
+            "hedgelab-cobertura-$TAG.zip" \
+            --target "$GITHUB_SHA" \
+            --title "HedgeLab $TAG" \
+            --notes "Versão publicada em produção: $URL_PRODUCAO" \
+            --generate-notes
