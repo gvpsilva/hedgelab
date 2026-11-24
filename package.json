@@ -1,0 +1,22 @@
+{
+  "name": "hedgelab",
+  "version": "1.0.0",
+  "description": "Simulador web de hedge cambial (termo e opção) e swap de juros",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node scripts/servidor.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "chart.js": "^4.4.1",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2"
+  }
+}
