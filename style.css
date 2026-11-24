@@ -1,0 +1,416 @@
+:root {
+  --primary-color: #0f2b48;   /* azul-marinho: títulos e cabeçalho */
+  --secondary-color: #1b4965; /* azul: contrato a termo */
+  --accent-color: #2a9d8f;    /* verde-azulado: opção de compra / destaque */
+  --warning-color: #e76f51;   /* laranja: posição descoberta / erros */
+  --light-bg: #f8f9fa;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --text-dark: #2d3748;
+  --text-muted: #718096;
+  --border-radius: 8px;
+  --box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Zera margens padrão do navegador e faz o padding contar dentro da largura */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  background-color: var(--light-bg);
+  color: var(--text-dark);
+  line-height: 1.5;
+  padding: 24px 16px;
+}
+
+/* Limita a largura do conteúdo e centraliza na tela */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Cabeçalho com identificação do trabalho */
+header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: #ffffff;
+  padding: 24px 32px;
+  border-radius: var(--border-radius);
+  margin-bottom: 24px;
+  box-shadow: var(--box-shadow);
+}
+
+header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+header p {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+/* Etiqueta com o nome da disciplina */
+.badge-course {
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Linha com os nomes da dupla */
+header .authors {
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+/* Grade: uma coluna no celular; formulário (380px) + relatórios em telas largas */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 992px) {
+  .dashboard-grid {
+    grid-template-columns: 380px 1fr;
+  }
+}
+
+/* min-width: 0 impede que a tabela larga estique a coluna dos relatórios */
+main {
+  min-width: 0;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--box-shadow);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+/* Título do cartão, com espaço à direita para botões */
+.card-title {
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Separa os grupos do formulário (Opção, Swap) */
+.card-title.section-break {
+  margin-top: 20px;
+}
+
+/* Texto explicativo abaixo do título de um cartão */
+.card-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+/* Campo vazio ou fora dos limites fica com borda laranja */
+.form-group input:invalid {
+  border-color: var(--warning-color);
+}
+
+/* Dica curta abaixo de cada campo */
+.helper-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  flex: 1;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  text-align: center;
+}
+
+/* Leve "afundamento" ao clicar */
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: #21867a;
+}
+
+.btn-secondary {
+  background-color: #e2e8f0;
+  color: var(--text-dark);
+}
+
+.btn-secondary:hover {
+  background-color: #cbd5e1;
+}
+
+/* Botão compacto usado nos títulos dos cartões */
+.btn-small {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+/* Três cartões de indicadores lado a lado (quebram em telas estreitas) */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-box {
+  background-color: #f1f5f9;
+  border-left: 4px solid var(--primary-color);
+  padding: 16px;
+  border-radius: 4px;
+}
+
+/* A cor da borda lateral repete a cor da estratégia no gráfico */
+.metric-box.accent {
+  border-left-color: var(--accent-color);
+}
+
+.metric-box.warning {
+  border-left-color: var(--warning-color);
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-top: 4px;
+}
+
+/* Altura fixa: o Chart.js ocupa todo o espaço do contêiner */
+.chart-container {
+  position: relative;
+  height: 350px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+/* Rolagem horizontal da tabela em telas estreitas */
+.table-responsive {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+/* Valores alinhados à direita para facilitar a comparação */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  font-size: 0.88rem;
+}
+
+th,
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+th {
+  background-color: #f8fafc;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+/* A primeira coluna (cenário) fica alinhada à esquerda */
+th:first-child,
+td:first-child {
+  text-align: left;
+}
+
+tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Cenário em que o câmbio fica estável (variação 0%) */
+tbody tr.linha-atual {
+  background-color: #fefce8;
+}
+
+/* Coluna "Opção vs Termo": verde quando a Call vence, azul quando o Termo vence */
+.best-option {
+  font-weight: 700;
+  color: var(--accent-color);
+}
+
+.forward-better {
+  font-weight: 700;
+  color: var(--secondary-color);
+}
+
+/* Análise do swap (fundo azul-claro) */
+.swap-section {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 16px;
+  margin-top: 24px;
+}
+
+.swap-section h4 {
+  color: #1e40af;
+  margin-bottom: 8px;
+}
+
+.swap-section p {
+  font-size: 0.88rem;
+  color: #1e3a8a;
+  line-height: 1.6;
+}
+
+/* Parecer técnico (fundo verde-claro) */
+.report-opinion {
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 6px;
+  padding: 18px;
+  margin-top: 20px;
+}
+
+.report-opinion h4 {
+  color: #065f46;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.report-opinion p {
+  color: #047857;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Botões de exportação no título do resumo */
+.report-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Lista de parâmetros do resumo em grade de colunas */
+.report-params {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px 20px;
+  font-size: 0.88rem;
+}
+
+.report-params dt {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.report-params dd {
+  font-weight: 600;
+}
+
+/* Ao imprimir, o formulário é ocultado: os parâmetros usados já aparecem no
+   "Relatório da Simulação", então o documento fica só com os resultados. */
+@media print {
+  body {
+    background-color: #ffffff;
+    padding: 0;
+  }
+
+  aside,
+  .btn {
+    display: none;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  /* Evita cortar indicadores e o resumo no meio entre duas páginas */
+  .metric-box,
+  .report-summary,
+  .swap-section,
+  .report-opinion {
+    break-inside: avoid;
+  }
+
+  /* Mantém as cores de fundo do cabeçalho na impressão */
+  header {
+    background: #0f2b48 !important;
+    color: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
