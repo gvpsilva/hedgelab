@@ -1,8 +1,9 @@
+
 :root {
-  --primary-color: #0f2b48;   /* azul-marinho: títulos e cabeçalho */
-  --secondary-color: #1b4965; /* azul: contrato a termo */
-  --accent-color: #2a9d8f;    /* verde-azulado: opção de compra / destaque */
-  --warning-color: #e76f51;   /* laranja: posição descoberta / erros */
+  --primary-color: #0f2b48;   
+  --secondary-color: #1b4965; 
+  --accent-color: #2a9d8f;    
+  --warning-color: #e76f51;   
   --light-bg: #f8f9fa;
   --card-bg: #ffffff;
   --border-color: #e2e8f0;
@@ -13,7 +14,7 @@
     0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* Zera margens padrão do navegador e faz o padding contar dentro da largura */
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -30,13 +31,13 @@ body {
   padding: 24px 16px;
 }
 
-/* Limita a largura do conteúdo e centraliza na tela */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-/* Cabeçalho com identificação do trabalho */
+
 header {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   color: #ffffff;
@@ -57,7 +58,7 @@ header p {
   opacity: 0.9;
 }
 
-/* Etiqueta com o nome da disciplina */
+
 .badge-course {
   display: inline-block;
   background-color: rgba(255, 255, 255, 0.2);
@@ -69,13 +70,7 @@ header p {
   letter-spacing: 0.5px;
 }
 
-/* Linha com os nomes da dupla */
-header .authors {
-  margin-top: 8px;
-  font-size: 0.85rem;
-}
 
-/* Grade: uma coluna no celular; formulário (380px) + relatórios em telas largas */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -88,7 +83,7 @@ header .authors {
   }
 }
 
-/* min-width: 0 impede que a tabela larga estique a coluna dos relatórios */
+
 main {
   min-width: 0;
 }
@@ -102,7 +97,7 @@ main {
   margin-bottom: 24px;
 }
 
-/* Título do cartão, com espaço à direita para botões */
+
 .card-title {
   font-size: 1.2rem;
   color: var(--primary-color);
@@ -116,12 +111,11 @@ main {
   flex-wrap: wrap;
 }
 
-/* Separa os grupos do formulário (Opção, Swap) */
+
 .card-title.section-break {
   margin-top: 20px;
 }
 
-/* Texto explicativo abaixo do título de um cartão */
 .card-subtitle {
   font-size: 0.85rem;
   color: var(--text-muted);
@@ -154,17 +148,33 @@ main {
   border-color: var(--accent-color);
 }
 
-/* Campo vazio ou fora dos limites fica com borda laranja */
 .form-group input:invalid {
   border-color: var(--warning-color);
 }
 
-/* Dica curta abaixo de cada campo */
+
+.form-error {
+  background-color: #fff1ee;
+  border: 1px solid var(--warning-color);
+  color: #9a3412;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.form-error ul {
+  margin-left: 18px;
+}
+
+
 .helper-text {
   font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: 3px;
 }
+
+
 
 .btn-group {
   display: flex;
@@ -184,7 +194,7 @@ main {
   text-align: center;
 }
 
-/* Leve "afundamento" ao clicar */
+
 .btn:active {
   transform: translateY(1px);
 }
@@ -207,14 +217,13 @@ main {
   background-color: #cbd5e1;
 }
 
-/* Botão compacto usado nos títulos dos cartões */
+
 .btn-small {
   flex: 0 0 auto;
   padding: 4px 10px;
   font-size: 0.8rem;
 }
 
-/* Três cartões de indicadores lado a lado (quebram em telas estreitas) */
 .metrics-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -229,7 +238,7 @@ main {
   border-radius: 4px;
 }
 
-/* A cor da borda lateral repete a cor da estratégia no gráfico */
+
 .metric-box.accent {
   border-left-color: var(--accent-color);
 }
@@ -252,7 +261,7 @@ main {
   margin-top: 4px;
 }
 
-/* Altura fixa: o Chart.js ocupa todo o espaço do contêiner */
+
 .chart-container {
   position: relative;
   height: 350px;
@@ -260,13 +269,12 @@ main {
   margin-bottom: 24px;
 }
 
-/* Rolagem horizontal da tabela em telas estreitas */
+
 .table-responsive {
   overflow-x: auto;
   margin-top: 16px;
 }
 
-/* Valores alinhados à direita para facilitar a comparação */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -286,7 +294,7 @@ th {
   font-weight: 600;
 }
 
-/* A primeira coluna (cenário) fica alinhada à esquerda */
+
 th:first-child,
 td:first-child {
   text-align: left;
@@ -296,12 +304,11 @@ tbody tr:hover {
   background-color: #f1f5f9;
 }
 
-/* Cenário em que o câmbio fica estável (variação 0%) */
+
 tbody tr.linha-atual {
   background-color: #fefce8;
 }
 
-/* Coluna "Opção vs Termo": verde quando a Call vence, azul quando o Termo vence */
 .best-option {
   font-weight: 700;
   color: var(--accent-color);
@@ -312,7 +319,7 @@ tbody tr.linha-atual {
   color: var(--secondary-color);
 }
 
-/* Análise do swap (fundo azul-claro) */
+
 .swap-section {
   background-color: #eff6ff;
   border: 1px solid #bfdbfe;
@@ -332,7 +339,7 @@ tbody tr.linha-atual {
   line-height: 1.6;
 }
 
-/* Parecer técnico (fundo verde-claro) */
+
 .report-opinion {
   background-color: #ecfdf5;
   border: 1px solid #a7f3d0;
@@ -353,13 +360,13 @@ tbody tr.linha-atual {
   line-height: 1.6;
 }
 
-/* Botões de exportação no título do resumo */
+
 .report-actions {
   display: flex;
   gap: 8px;
 }
 
-/* Lista de parâmetros do resumo em grade de colunas */
+
 .report-params {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -376,8 +383,18 @@ tbody tr.linha-atual {
   font-weight: 600;
 }
 
-/* Ao imprimir, o formulário é ocultado: os parâmetros usados já aparecem no
-   "Relatório da Simulação", então o documento fica só com os resultados. */
+
+.site-footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 8px 0 16px;
+}
+
+.site-footer a {
+  color: var(--secondary-color);
+}
+
 @media print {
   body {
     background-color: #ffffff;
@@ -385,7 +402,8 @@ tbody tr.linha-atual {
   }
 
   aside,
-  .btn {
+  .btn,
+  .site-footer {
     display: none;
   }
 
@@ -398,7 +416,13 @@ tbody tr.linha-atual {
     border: 1px solid #ccc;
   }
 
-  /* Evita cortar indicadores e o resumo no meio entre duas páginas */
+
+  .card-title,
+  thead {
+    break-after: avoid;
+  }
+
+
   .metric-box,
   .report-summary,
   .swap-section,
@@ -406,7 +430,6 @@ tbody tr.linha-atual {
     break-inside: avoid;
   }
 
-  /* Mantém as cores de fundo do cabeçalho na impressão */
   header {
     background: #0f2b48 !important;
     color: white !important;
