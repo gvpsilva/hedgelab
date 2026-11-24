@@ -5,7 +5,8 @@ Simulador web de gestão de riscos financeiros: compara estratégias de **hedge 
 
 
 ## Integrantes
-
+Estêvão Felipe da Fonseca  
+Gabriel Vieira Pereira da Silva
 
 ## Sobre o sistema
 
