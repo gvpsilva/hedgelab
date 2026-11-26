@@ -90,19 +90,18 @@ Para abrir o sistema localmente: `npm start` e acessar http://localhost:4173.
  
 | Tipo | Quantidade | Onde |
 |---|---|---|
-| Unitários | 30 | `tests/unit/` |
+| Unitários | 40 | `tests/unit/` |
 | End-to-end | 5 | `tests/e2e/simulacao.spec.js` |
 | Cobertura | 96,8% das linhas e 81,5% dos ramos | Mínimo de 80% verificado automaticamente (`jest.config.js`) |
  
 **Testes unitários por arquivo**
- 
 | Arquivo | Testes | O que cobre |
 |---|---|---|
+| `complementares.test.js` | 19 | Casos-limite da formatação, da paridade de juros, da opção e da validação; simulação completa, swap sem diferença, cenários personalizados e textos dos relatórios. |
 | `calculos.test.js` | 14 | Taxa a termo, custo da call, swap, cenários e validação dos parâmetros. |
-| `complementares.test.js` | 9 | Casos-limite da formatação, da paridade de juros, da opção e da validação. |
 | `relatorio.test.js` | 4 | Formatação, matriz de cenários, pareceres e arquivo CSV. |
 | `app.test.js` | 3 | Interface: formulário, gráfico, exportação do CSV e impressão. |
- 
+
 **Testes end-to-end**
  
 1. Carrega o exemplo, atualiza a matriz, o gráfico e os pareceres;
