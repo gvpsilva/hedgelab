@@ -68,3 +68,18 @@ test('mostra economia no swap quando a taxa pré é menor que a flutuante', asyn
 
   await expect(page.locator('#reportParams')).toContainText('9,00% a.a.');
 });
+test('imprime o relatório sem o formulário e com os parâmetros usados', async ({ page }) => {
+  await page.evaluate(() => {
+    window.impressoes = 0;
+    window.print = () => { window.impressoes += 1; };
+  });
+  await page.getByRole('button', { name: 'Imprimir / PDF' }).click();
+  expect(await page.evaluate(() => window.impressoes)).toBe(1);
+
+  await page.emulateMedia({ media: 'print' });
+  await expect(page.locator('aside')).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Exportar CSV (Excel)' })).toBeHidden();
+  await expect(page.locator('#scenariosBody tr')).toHaveCount(13);
+  await expect(page.locator('#reportParams')).toBeVisible();
+  await expect(page.locator('#reportParams')).toContainText('Cotação spot');
+});
