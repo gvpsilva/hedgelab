@@ -17,3 +17,16 @@ describe('formatação', () => {
     expect(formatarNumero(5.49935, 4)).toBe('5,4994');
   });
 });
+describe('taxa a termo (paridade coberta de juros)', () => {
+  test('é igual ao spot quando os juros dos dois países são iguais', () => {
+    expect(calcularTaxaForward(5.2, 0.05, 0.05, 2)).toBeCloseTo(5.2, 10);
+  });
+
+  test('fica abaixo do spot quando os juros dos EUA são maiores que os do Brasil', () => {
+    expect(calcularTaxaForward(5.2, 0.03, 0.08, 1)).toBeLessThan(5.2);
+  });
+
+  test('é igual ao spot quando o prazo é zero', () => {
+    expect(calcularTaxaForward(5.2, 0.1075, 0.045, 0)).toBe(5.2);
+  });
+});
