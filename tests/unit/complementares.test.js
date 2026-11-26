@@ -50,3 +50,14 @@ describe('opção de compra', () => {
     });
   });
 });
+describe('validação e relatórios', () => {
+  test('lista de uma vez os erros dos nove campos quando o formulário está vazio', () => {
+    expect(validarParametros({})).toHaveLength(9);
+  });
+
+  test('considera empate entre call e termo como vantagem da opção', () => {
+    const resultado = descreverVantagem(0);
+    expect(resultado.classe).toBe('best-option');
+    expect(resultado.texto).toMatch(/^Opção economiza R\$\s0$/);
+  });
+});
