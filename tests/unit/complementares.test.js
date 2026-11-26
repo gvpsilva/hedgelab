@@ -83,3 +83,23 @@ describe('formatação para a tela e para o CSV', () => {
     expect(Formatacao.formatarDecimal(3)).toBe('3,00');
   });
 });
+describe('swap e cenários', () => {
+  test('não gera economia nem custo quando a taxa pré é igual à flutuante', () => {
+    expect(Calculos.calcularSwap(1000000, 0.1, 0.1, 1).diferenca).toBeCloseTo(0, 6);
+  });
+
+  test('simula apenas as variações informadas, quando passadas', () => {
+    const cenarios = Calculos.gerarCenarios({
+      exposicaoUSD: 1000,
+      spot: 5,
+      taxaForward: 5.2,
+      strike: 5.1,
+      premioCapitalizado: 0.1
+    }, [-0.1, 0.1]);
+    expect(cenarios.map((c) => c.spotFinal)).toEqual([4.5, 5.5]);
+  });
+
+  test('não permite alterar a lista padrão de variações de câmbio', () => {
+    expect(Object.isFrozen(Calculos.VARIACOES_CENARIO)).toBe(true);
+  });
+});
