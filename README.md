@@ -70,13 +70,32 @@ Com Node.js 20 ou superior, instale as dependências com `npm ci`.
 
 ## CI/CD e releases
 
+O workflow `.github/workflows/ci.yml` tem três etapas. Cada uma só roda se a anterior passar:
 
+| Etapa | Quando roda | O que faz |
+|---|---|---|
+| **1. Testes** | Todo push e pull request | Testes unitários com cobertura (mínimo de 80%) e testes e2e em Linux, macOS e Windows. |
+| **2. Deploy** | Push na `main` com os testes aprovados | Publica o site em produção na Vercel, usando a Vercel CLI. |
+| **3. Release** | Depois do deploy | Cria uma release no GitHub (ex.: `v1.0.42`) com as notas geradas a partir dos commits, o endereço de produção, o site empacotado e o relatório de cobertura. |
 
-**Configuração (uma única vez)**
+A versão da release usa o `MAJOR.MINOR` do `package.json` mais o número da execução do workflow. Para lançar a versão 1.1, basta mudar `"version"` no `package.json` para `1.1.0`.
 
-1. Na Vercel, importe o repositório (Add New → Project) para criar o projeto.
-2. Crie um token em *Account Settings → Tokens*.
-3. Obtenha os IDs: rode `npx vercel login` e `npx vercel link` na pasta do projeto; os valores `orgId` e `projectId` ficam em `.vercel/project.json`.
-4. No GitHub, em *Settings → Secrets and variables → Actions*, cadastre os segredos `VERCEL_TOKEN`, `VERCEL_ORG_ID` e `VERCEL_PROJECT_ID`.
+### Configuração (uma única vez)
 
-O `vercel.json` desliga o deploy automático da integração Git da Vercel (`git.deploymentEnabled: false`), para que só o GitHub Actions publique, e sempre depois dos testes.
+1. **Criar o projeto na Vercel:** em *Add New → Project*, importe o repositório `gvpsilva/hedgelab`.
+2. **Criar o token:** em *Account Settings → Tokens → Create*, gere um token e copie o valor (ele só é exibido uma vez).
+3. **Obter os IDs do projeto:**
+   - **Project ID** (`prj_...`): em *Settings → General* do projeto na Vercel;
+   - **Org ID** (`team_...`): em *Settings → General* da conta ou do time.
+
+   Alternativa pelo terminal: rode `npx vercel login` e `npx vercel link` na pasta do projeto. Os valores `orgId` e `projectId` ficam em `.vercel/project.json` (essa pasta não deve ir para o repositório).
+4. **Cadastrar os segredos no GitHub:** em *Settings → Secrets and variables → Actions → New repository secret*, crie:
+
+   | Segredo | Valor |
+   |---|---|
+   | `VERCEL_TOKEN` | Token criado no passo 2 |
+   | `VERCEL_ORG_ID` | Org ID do passo 3 |
+   | `VERCEL_PROJECT_ID` | Project ID do passo 3 |
+
+> **Por que o deploy é feito pelo GitHub Actions?**
+> O `vercel.json` desliga o deploy automático da integração Git da Vercel (`git.deploymentEnabled: false`). Assim, só o GitHub Actions publica, e sempre depois de os testes passarem nos três sistemas operacionais. Uma versão com defeito não chega à produção.
