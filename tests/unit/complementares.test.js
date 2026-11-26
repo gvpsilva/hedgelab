@@ -73,3 +73,13 @@ describe('relatórios', () => {
     expect(Relatorio.nomeArquivoCSV(new Date(2026, 2, 7))).toBe('relatorio_hedgelab_2026-03-07.csv');
   });
 });
+
+describe('formatação para a tela e para o CSV', () => {
+  test('formata taxa zero como 0,00%', () => {
+    expect(Formatacao.formatarPercentual(0)).toBe('0,00%');
+  });
+
+  test('usa duas casas decimais no CSV quando nenhuma é informada', () => {
+    expect(Formatacao.formatarDecimal(3)).toBe('3,00');
+  });
+});
