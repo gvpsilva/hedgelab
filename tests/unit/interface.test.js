@@ -64,3 +64,40 @@ describe('caixa de erros', () => {
   });
 });
 
+
+describe('relatórios na página', () => {
+  test('destaca na matriz a linha do câmbio estável (variação de 0%)', () => {
+    app.executarSimulacao(document);
+    const destacadas = document.querySelectorAll('#scenariosBody tr.linha-atual');
+    expect(destacadas).toHaveLength(1);
+    expect(destacadas[0].textContent).toContain('(0,0%)');
+  });
+
+  test('preenche o resumo com os nove parâmetros usados e a data da simulação', () => {
+    app.executarSimulacao(document);
+    expect(document.querySelectorAll('#reportParams dt')).toHaveLength(9);
+    expect(texto('reportParams')).toContain('12 meses');
+    expect(texto('reportTimestamp')).not.toBe('—');
+  });
+
+  test('mostra um aviso no lugar do gráfico quando o Chart.js não carrega', () => {
+    app.executarSimulacao(document);
+    expect(document.getElementById('chartFallback')).not.toBeNull();
+    // Os demais relatórios continuam funcionando
+    expect(texto('dispForwardRate')).toBe('R$ 5,5110');
+  });
+
+  test('continua recalculando sem erro quando o aviso do gráfico já está na tela', () => {
+    app.executarSimulacao(document);
+    preencher('spotRate', '6.00');
+    expect(() => app.executarSimulacao(document)).not.toThrow();
+    expect(texto('dispForwardRate')).toBe('R$ 6,3589');
+  });
+
+  test('não exporta CSV antes da primeira simulação', () => {
+    expect(app.baixarCSV(document)).toBeNull();
+    expect(app.obterUltimaSimulacao()).toBeNull();
+  });
+});
+
+
