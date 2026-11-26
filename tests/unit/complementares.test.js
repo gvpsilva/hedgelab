@@ -61,28 +61,40 @@ describe('validação e relatórios', () => {
     expect(resultado.texto).toMatch(/^Opção economiza R\$\s0$/);
   });
 });
-describe('relatórios', () => {
-  test('inclui o principal e a despesa travada na análise do swap', () => {
-    const swap = { jurosFlutuante: 537500, jurosFixo: 560000, diferenca: -22500 };
-    const texto = Relatorio.textoSwap({ ...exemploPratico, principalSwap: 5000000 }, swap);
-    expect(texto).toMatch(/R\$\s5\.000\.000/);
-    expect(texto).toMatch(/R\$\s560\.000/);
+
+const Formatacao = require('../../public/js/formatacao');
+const Calculos = require('../../public/js/calculos');
+const Relatorio = require('../../public/js/relatorio');
+
+const exemploPratico = {
+  exposicaoUSD: 2500000,
+  spot: 5.25,
+  jurosBR: 0.1125,
+  jurosEUA: 0.0475,
+  prazoMeses: 12,
+  strike: 5.35,
+  premio: 0.22,
+  principalSwap: 15000000,
+  taxaPreSwap: 0.118
+};
+
+describe('simulação completa', () => {
+  test('converte o prazo de meses para anos', () => {
+    expect(Calculos.simular({ ...exemploPratico, prazoMeses: 6 }).prazoAnos).toBe(0.5);
   });
 
-  test('completa mês e dia com zero à esquerda no nome do arquivo CSV', () => {
-    expect(Relatorio.nomeArquivoCSV(new Date(2026, 2, 7))).toBe('relatorio_hedgelab_2026-03-07.csv');
+  test('calcula o custo máximo da call como exposição x (strike + prêmio capitalizado)', () => {
+    const resultado = Calculos.simular(exemploPratico);
+    expect(resultado.custoTetoCall).toBeCloseTo(exemploPratico.exposicaoUSD * resultado.tetoCall, 6);
+  });
+
+  test('indica que a call não domina o termo e mostra o spot de equilíbrio no exemplo prático', () => {
+    const resultado = Calculos.simular(exemploPratico);
+    expect(resultado.callDominaTermo).toBe(false);
+    expect(resultado.spotEquilibrio).toBeCloseTo(5.331, 3);
   });
 });
 
-describe('formatação para a tela e para o CSV', () => {
-  test('formata taxa zero como 0,00%', () => {
-    expect(Formatacao.formatarPercentual(0)).toBe('0,00%');
-  });
-
-  test('usa duas casas decimais no CSV quando nenhuma é informada', () => {
-    expect(Formatacao.formatarDecimal(3)).toBe('3,00');
-  });
-});
 describe('swap e cenários', () => {
   test('não gera economia nem custo quando a taxa pré é igual à flutuante', () => {
     expect(Calculos.calcularSwap(1000000, 0.1, 0.1, 1).diferenca).toBeCloseTo(0, 6);
@@ -101,5 +113,28 @@ describe('swap e cenários', () => {
 
   test('não permite alterar a lista padrão de variações de câmbio', () => {
     expect(Object.isFrozen(Calculos.VARIACOES_CENARIO)).toBe(true);
+  });
+});
+
+describe('formatação para a tela e para o CSV', () => {
+  test('formata taxa zero como 0,00%', () => {
+    expect(Formatacao.formatarPercentual(0)).toBe('0,00%');
+  });
+
+  test('usa duas casas decimais no CSV quando nenhuma é informada', () => {
+    expect(Formatacao.formatarDecimal(3)).toBe('3,00');
+  });
+});
+
+describe('relatórios', () => {
+  test('inclui o principal e a despesa travada na análise do swap', () => {
+    const swap = { jurosFlutuante: 537500, jurosFixo: 560000, diferenca: -22500 };
+    const texto = Relatorio.textoSwap({ ...exemploPratico, principalSwap: 5000000 }, swap);
+    expect(texto).toMatch(/R\$\s5\.000\.000/);
+    expect(texto).toMatch(/R\$\s560\.000/);
+  });
+
+  test('completa mês e dia com zero à esquerda no nome do arquivo CSV', () => {
+    expect(Relatorio.nomeArquivoCSV(new Date(2026, 2, 7))).toBe('relatorio_hedgelab_2026-03-07.csv');
   });
 });
