@@ -5,7 +5,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-
 permissions:
   contents: read
 
@@ -18,7 +17,7 @@ jobs:
     name: Testes (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false 
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
@@ -50,6 +49,7 @@ jobs:
         id: e2e
         run: npm run test:e2e
 
+      # Guardado para ser anexado à release
       - name: Publicar relatório de cobertura
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
@@ -57,29 +57,42 @@ jobs:
           name: cobertura
           path: coverage/
 
-      - name: Publicar relatório do Playwright (em caso de falha)
+      - name: Publicar relatório do Playwright (em caso de falha nos e2e)
         if: failure() && steps.e2e.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-${{ matrix.os }}
           path: playwright-report/
 
-
   deploy:
     name: Deploy em produção (Vercel)
-    needs: testes 
+    needs: testes # Só publica se os testes passarem nos três sistemas
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: production
       url: ${{ steps.publicar.outputs.url }}
     env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     outputs:
       url: ${{ steps.publicar.outputs.url }}
 
     steps:
+      - name: Conferir os segredos da Vercel
+        run: |
+          faltando=""
+          [ -z "$VERCEL_TOKEN" ] && faltando="$faltando VERCEL_TOKEN"
+          [ -z "$VERCEL_ORG_ID" ] && faltando="$faltando VERCEL_ORG_ID"
+          [ -z "$VERCEL_PROJECT_ID" ] && faltando="$faltando VERCEL_PROJECT_ID"
+          if [ -n "$faltando" ]; then
+            echo "::error::Segredos não cadastrados:$faltando"
+            exit 1
+          fi
+          case "$VERCEL_ORG_ID" in team_*) ;; *) echo "::warning::VERCEL_ORG_ID costuma começar com team_. Confira o valor de orgId em .vercel/project.json." ;; esac
+          case "$VERCEL_PROJECT_ID" in prj_*) ;; *) echo "::warning::VERCEL_PROJECT_ID costuma começar com prj_. Confira o valor de projectId em .vercel/project.json." ;; esac
+
       - name: Baixar o código
         uses: actions/checkout@v4
 
@@ -91,18 +104,23 @@ jobs:
       - name: Instalar a Vercel CLI
         run: npm install --global vercel@latest
 
+      - name: Verificar acesso à Vercel
+        run: |
+          vercel whoami --token="$VERCEL_TOKEN"
+          vercel project ls --token="$VERCEL_TOKEN"
+
       - name: Baixar as configurações do projeto na Vercel
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Preparar os arquivos de produção
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token="$VERCEL_TOKEN"
 
       - name: Publicar na Vercel
         id: publicar
         run: |
-          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          url=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
           echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "Publicado em: $url" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Publicado em produção: $url" >> "$GITHUB_STEP_SUMMARY"
 
 
   release:
@@ -110,8 +128,7 @@ jobs:
     needs: deploy 
     runs-on: ubuntu-latest
     permissions:
-      contents: write 
-
+      contents: write
     steps:
       - name: Baixar o código
         uses: actions/checkout@v4
@@ -129,9 +146,11 @@ jobs:
           path: coverage
 
       - name: Empacotar o site e a cobertura
+        env:
+          TAG: ${{ steps.versao.outputs.tag }}
         run: |
-          zip -qr "hedgelab-site-${{ steps.versao.outputs.tag }}.zip" public
-          zip -qr "hedgelab-cobertura-${{ steps.versao.outputs.tag }}.zip" coverage
+          zip -qr "hedgelab-site-$TAG.zip" public
+          zip -qr "hedgelab-cobertura-$TAG.zip" coverage
 
       - name: Criar a release no GitHub
         env:
