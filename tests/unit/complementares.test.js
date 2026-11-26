@@ -61,3 +61,15 @@ describe('validação e relatórios', () => {
     expect(resultado.texto).toMatch(/^Opção economiza R\$\s0$/);
   });
 });
+describe('relatórios', () => {
+  test('inclui o principal e a despesa travada na análise do swap', () => {
+    const swap = { jurosFlutuante: 537500, jurosFixo: 560000, diferenca: -22500 };
+    const texto = Relatorio.textoSwap({ ...exemploPratico, principalSwap: 5000000 }, swap);
+    expect(texto).toMatch(/R\$\s5\.000\.000/);
+    expect(texto).toMatch(/R\$\s560\.000/);
+  });
+
+  test('completa mês e dia com zero à esquerda no nome do arquivo CSV', () => {
+    expect(Relatorio.nomeArquivoCSV(new Date(2026, 2, 7))).toBe('relatorio_hedgelab_2026-03-07.csv');
+  });
+});
