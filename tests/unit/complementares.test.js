@@ -30,3 +30,23 @@ describe('taxa a termo (paridade coberta de juros)', () => {
     expect(calcularTaxaForward(5.2, 0.1075, 0.045, 0)).toBe(5.2);
   });
 });
+describe('opção de compra', () => {
+  test('não altera o prêmio quando os juros brasileiros são zero', () => {
+    expect(calcularPremioCapitalizado(0.18, 0, 1)).toBe(0.18);
+  });
+
+  test('custo da call nunca passa do teto (strike + prêmio) em nenhum cenário', () => {
+    const entrada = {
+      exposicaoUSD: 1000000,
+      spot: 5.2,
+      taxaForward: 5.5,
+      strike: 5.3,
+      premioCapitalizado: 0.2
+    };
+    const teto = entrada.exposicaoUSD * (entrada.strike + entrada.premioCapitalizado);
+
+    gerarCenarios(entrada).forEach((cenario) => {
+      expect(cenario.custoCall).toBeLessThanOrEqual(teto + 1e-6);
+    });
+  });
+});
