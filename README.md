@@ -62,13 +62,11 @@ A equipe foi responsável pela definição dos requisitos, validação das funci
 ## Execução dos testes
 
 
-**Resumo dos testes**
+Com Node.js 20 ou superior, instale as dependências com `npm ci`.
 
-
-
-Testes end-to-end:
-
-
+- `npm run test:coverage` executa os testes unitários e exige 80% de cobertura global de instruções, ramificações, funções e linhas.
+- `npx playwright install chromium` instala o navegador. No Linux, use `npx playwright install --with-deps chromium` para instalar também as dependências do sistema.
+- `npm run test:e2e` inicia o servidor local e testa a simulação, a validação do formulário, o gráfico e a exportação em CSV.
 
 ## CI/CD e releases
 
