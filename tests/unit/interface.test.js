@@ -38,3 +38,29 @@ describe('captura dos dados do formulário', () => {
   });
 });
 
+
+describe('caixa de erros', () => {
+  test('mostra um item para cada erro', () => {
+    app.mostrarErros(document, ['Erro A', 'Erro B', 'Erro C']);
+    const caixa = document.getElementById('formError');
+    expect(caixa.hidden).toBe(false);
+    expect(caixa.querySelectorAll('li')).toHaveLength(3);
+  });
+
+  test('some e fica vazia quando não há mais erros', () => {
+    app.mostrarErros(document, ['Erro A']);
+    app.mostrarErros(document, []);
+    const caixa = document.getElementById('formError');
+    expect(caixa.hidden).toBe(true);
+    expect(caixa.innerHTML).toBe('');
+  });
+
+  test('lista todos os campos com problema de uma vez', () => {
+    preencher('spotRate', '');
+    preencher('tenorMonths', '6.5');
+    expect(app.executarSimulacao(document)).toBeNull();
+    expect(document.querySelectorAll('#formError li')).toHaveLength(2);
+    expect(texto('formError')).toContain('Prazo: informe um número inteiro de meses.');
+  });
+});
+
