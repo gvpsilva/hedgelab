@@ -55,3 +55,16 @@ test('exporta o CSV com os dados da simulação atual', async ({ page }) => {
   expect(csv).toContain('Exposição (US$);2500000,00');
   expect(csv).toContain('MATRIZ DE CENÁRIOS');
 });
+test('mostra economia no swap quando a taxa pré é menor que a flutuante', async ({ page }) => {
+
+  const taxaPre = page.locator('#swapFixedRate');
+  await taxaPre.fill('9');
+  await taxaPre.press('Enter');
+
+  const analiseSwap = page.locator('#swapAnalysisText');
+  await expect(analiseSwap).toContainText('economia de juros de R$');
+  await expect(analiseSwap).toContainText('87.500');
+  await expect(analiseSwap).toContainText('9,00% a.a.');
+
+  await expect(page.locator('#reportParams')).toContainText('9,00% a.a.');
+});
